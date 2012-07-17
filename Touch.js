@@ -5,8 +5,6 @@ var E_TYPE_MOVE=( window.ontouchmove===undefined ) ? 'mousemove' : 'touchmove';
 var E_TYPE_END=( window.ontouchend===undefined ) ? 'mouseup' : 'touchend';
 var E_TYPE_CANCEL='touchcancel';
 var E_TYPE_CLICK='click';
-function D(s){D.on && console.log(s);}
-D.on=true;
 
 function Tpos(){
 	this.first=[];
@@ -92,7 +90,6 @@ function Touch(element, cbStart, cbEnd, cbMove){
 
 Touch.prototype={
 _start: function(evt){
-D('_start');
     var mtx=this.element.getBoundingClientRect();
 	this.metorix={x:mtx.left, y:mtx.top, r:mtx.right, b:mtx.bottom, w:mtx.right-mtx.left, h:mtx.bottom-mtx.top};
 	
@@ -106,16 +103,10 @@ D('_start');
 		this.cbStart.call(this, evt, this.tpos.current);
 	
 	}
-//    if( this.touchCount()===1 ){
-//        this.on('move');
-//        this.on('end');
-//    }
  	
-D('_start;');
 	return true;
 },
 _move: function(evt){
-D('_move');
     this.tpos.add(evt);
  
     this._setOptionalTargets(evt);
@@ -125,39 +116,22 @@ D('_move');
         this.cbMove.call(this, evt, this.tpos.current);
     }
  
-D('_move;');
     return true;
 },
 _end: function(evt){
-D('_end ');
- 	this._setOptionalTargets(evt);
-D('_end2 '+this.targets.length+' '+ this.currentTargets.length+' '+ this.targetTouches.length+' '+this.changedTouches.length);
+    this._setOptionalTargets(evt);
     
     this.stopEvent(evt);
     if( this.cbEnd ){
         this.cbEnd.call(this, evt, this.tpos.current);
     }
-D('_end3 '+this.tpos); 
- 
-//    if( this.touchCount()===0 ){
-        this.tpos.clear();
-//        this.off('move');
-//        this.off('end');
-//    }
-D('_end;'); 
+    this.tpos.clear();
     if( this.changedTouches[0]===this.currentTargets[0] ){
         this._click(evt);
     }
     return true;
 },
 _click: function(evt){
-D('_click ');
-
-//	this.tpos.add(evt);
-//	this._setOptionalTargets(evt);
-	
-D('_click '+this.target);
-
     this.stopEvent(evt);
 	if( this.cbClick ){
 		this.cbClick.call(this, evt, this.tpos.current);
@@ -166,24 +140,16 @@ D('_click '+this.target);
 	
 },
 _cancel: function(evt){
-D('_cancel '+this.target);
-	
-	this.stopEvent(evt);
-	if( this.cbCancel ){
-		this.cbCancel.call(this, evt, this.tpos.current);
-	}
+    this.stopEvent(evt);
+    if( this.cbCancel ){
+        this.cbCancel.call(this, evt, this.tpos.current);
+    }
 	
 	this.tpos.clear();
-//	this.off('move');
-//	this.off('end');
-
 	return true;
 },
 _setOptionalTargets: function(evt){
-D('_setOTar ');
 	this.currentTargets=this._getCurrentTargets(evt);
-    
-//D('_setOTar2 '+evt.changedTouches);
     if( evt.changedTouches ){
         var t=evt.changedTouches;
         this.changedTouches.length=t.length;
@@ -193,7 +159,6 @@ D('_setOTar ');
     }else{
         this.changedTouches.length=0;
     }
-//D('_setOTar3'+evt.targetTouches);
     if( evt.targetTouches ){
         var t=evt.targetTouches;
         this.targetTouches.length=t.length;
@@ -203,12 +168,10 @@ D('_setOTar ');
     }else{
         this.targetTouches.length=0;
     }
-//D('_setOTar; '+this.currentTargets.length+', '+this.targetTouches.length+', '+this.changedTouches.length );
 	return this;
 },
 
 _getCurrentTargets: function(evt){
-D('getCTars ');
     var ret=[];
 	
 	var cname=this.element.dataset.keypad;
@@ -216,105 +179,41 @@ D('getCTars ');
     
     els=Array.prototype.slice.call(els);
     els.push(this.element);
-//D('getCTars2 '+els+' '+els.length+' '+cname);
 	
 	var regcname=new RegExp("(^|\\s)" + cname + "(\\s|$)");
     
     for( var i=0, tpos, touch; touch=this.tpos.current[i]; i++ ){
-//D('getCTars4 '+i+':'+touch.x+','+touch.y);
 		
 		for( var k=0, el; el=els[k]; k++ ){
-//D('getCTars5 '+k+':'+el.nodeName+','+el.childNodes.length+' '+el.className+':'+regcname.test(el.className));
-            //if( !(cname && regcname.test(el.className)) && el.childNodes.length>1 || el.firstChild.nodeType===1 ){
             if( el.className && regcname.test(el.className) ){
                 ;
             }else{
                 if( el.childNodes.length>1 || el.firstChild && el.firstChild.nodeType===1 ){
-//D('getCTars con '+k);
                     continue;
                 }
             }
-//D('getCTars6 '+k);
 			var rect=el.getBoundingClientRect();
-//D('getCTars7 '+rect.left+','+rect.top);
 			if( rect.left<=touch.x && touch.x<=rect.right && rect.top<=touch.y && touch.y<=rect.bottom ){
-//D('getCTars break '+ret.length);
 				ret[ret.length]=el;
 				break;
 			}
 	    }
 	}
     
-D('_getCTars; '+ret+' '+ret.length);
-//D('_getTars; '+ret+' '+ret[0].nodeName+' '+((ret[0].childNodes.length)?ret[0].childNodes.length+' '+ret[0].firstChild.nodeType:'')+' '+ret[0].dataset.n);
 	return ret;
 },
-//_getTarget: function(evt){
-//    var ret=null;
-//	
-//	var touch=this.tpos.current[0];
-//	
-//console.log('_getTar '+touch.x+' '+touch.y);
-//    
-//	var cname=this.element.dataset.classname;
-//    var els=(cname)? this.element.getElementsByClassName(cname): this.element.getElementsByTagName('*');
-//    if( els ){
-//    for( var i=0, el; el=els[i]; i++ ){
-//        if( el.childNodes.length>1 || el.firstChild.nodeType===1 ){
-//            continue;
-//        }
-//        var rect=el.getBoundingClientRect();
-//        if( rect.left<=touch.x && touch.x<=rect.right && rect.top<=touch.y && touch.y<=rect.bottom ){
-//            ret=el;
-//            break;
-//        }
-//    }
-//    }
-//    
-//    if( !ret ){
-//        var rect=this.element.getBoundingClientRect();
-//        if( rect.left<=touch.x && touch.x<=rect.right && rect.top<=touch.y && touch.y<=rect.bottom ){
-//            ret=this.element;
-//        }
-//    }
-//    
-//console.log('_getTar; '+ret+' '+ret.nodeName+' '+((ret.childNodes.length)?ret.childNodes.length+' '+ret.firstChild.nodeType:'')+' '+ret.dataset.n);
-//	return ret;
-//},
-//_setTargets: function(evt){
-//	this.target=this._getTarget(evt);
-//	
-//	if( evt.touches ){
-//console.log('_setTar-if '+evt.touches +', '+evt.targetTouches+', '+evt.changedTouches);
-//        
-//       	var tt=( evt.targetTouches.length )? evt.targetTouches: evt.changedTouches;
-////console.log('_setTar2 '+tt[0]+' '+tt.length);
-//		this.targets.length=tt.length;
-//        for( var i=0; i<tt.length; i++ ){
-//			this.targets[i]=tt.target;
-//		}
-//	}else{
-//		this.targets.length=1;
-//		this.targets[0]=evt.target;
-//	}
-//console.log('_setTar; '+this.target+' '+this.target.dataset.n+', '+this.pos(0,1).y+','+this.posDef(0,1).y );
-//	return this;
-//},
 _setTarget: function(evt){
 	this._getTouchesTarget(evt);
 	this.target=this.targets[0];
 },
 _getTouchesTarget: function(evt){
-D('_getTar ');
 	if( evt.touches && evt.touches.length ){
 		var touches=evt.touches;
-D('_getTar1 '+touches.length);
 		this.targets.length=touches.length;
 		for( var i=0; i<touches.length; i++ ){
 			this.targets[i]=touches[i].target;
 		}
 	}else{
-D('_getTar1 else');
 		this.targets.length=1;
 		this.targets[0]=evt.target||evt.touches[0].target;
 	}
@@ -348,18 +247,8 @@ cancel: function(callback){
 },
 inElement: function( el ){
 	var mx=this.metorix, tp=this.tpos.current[0];
-console.log('inE '+mx.x+' '+tp.x+' '+mx.r+', '+mx.y+' '+tp.y+' '+mx.b);
 	return ( mx.x<=tp.x && tp.x<=mx.r && mx.y<=tp.y && tp.y<=mx.b );
 },
-//inElement: function( el ){
-//	while( el ){
-//		if( el==this.element ){
-//			return true;
-//		}
-//		el=el.parentNode;
-//	}
-//	return false;
-//},
 touchCount: function(){
 	return this.tpos.current.length;
 },
@@ -373,13 +262,10 @@ removeEvent: function(element, type, fn, flg){
 	if( this.__events[type] ){
 		element.removeEventListener(type, this.__events[type], flg||false);
 	}
-	//element.removeEventListener(type, fn, flg||false);
 	return this;
 },
 stopEvent: function(e){
 	e.preventDefault();
-	//e.stopPropagation();
-	
 },
 on: function(type){
 	switch(type){
